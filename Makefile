@@ -1,4 +1,4 @@
-test: sample.cpp barrier.cpp
-	g++ -o test sample.cpp barrier.cpp -lm -lpthread -lrt
+test: thread.cpp barrier.cpp
+	g++ -o test thread.cpp barrier.cpp -lm -lpthread -lrt
 clean:
 	rm test

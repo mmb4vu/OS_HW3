@@ -62,7 +62,7 @@ int main()
                 for (j = 0; j < N; j+= 2) {
                         start = (int)pow(2,i) * j;
                         end = (int)start + (int)pow(2,i);
-                        if (start >= N) break;
+                        if (start >= N) continue;
                         printf("Data pair: <%d , %d>\n", array[start], array[end]);
                         max = maxVal(array[start], array[end]);
                         printf("Pair Max: %i\n", max );

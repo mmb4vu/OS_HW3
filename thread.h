@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <pthread.h>
 
-typedef struct {
-  int id; // thread ID
+typedef struct threadArgs {
+        int id; // thread ID
 } threadArgs;
 
 int log_2 (int x);

@@ -3,14 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 #include "thread.h"
-
-/* g++ -o sample sample.cpp barrier.cpp -lm -lpthread -lrt */
-
-// Given a list of N numbers
-#define N 8
-
-// Program will use N/2 threads to find the solution
-#define N_THREADS N/2
+#include "barrier.h"
+#include <pthread.h>
 
 using namespace std;
 
@@ -27,9 +21,12 @@ using namespace std;
  */
 
 int array[] = { 1, 5, 35, 34, 22, 14, 15, 18 };
-int rounds = 0;
-int maximum = 0;
+int N =  8;
+int N_THREADS = N/2;
+int N_ROUNDS = log_2(N);
 
+// Barrier bar(N_THREADS);
+Barrier bar(N_THREADS);
 pthread_barrier_t mybarrier;
 
 int log_2 (int x){
@@ -49,31 +46,29 @@ int maxVal( int x, int y){
 }
 
 void* findMax (void* arg){
-        int i, start, end;
         threadArgs *args = (threadArgs*) arg;
-        for (i = 0; i < 2; i++) {
+        int x = args->id;
+        printf("X: %d\n", x);
+        for (int i = 0; i < N_ROUNDS; i++) {
                 printf("Round: %d ----------------\n", i);
-                start = (int)pow(2,i) * args->id;
+                int start = (int)pow(2,i) * x;
                 printf("Start value: %d\n", start );
-                end = start + (int)pow(2,i);
+                int end = start + (int)pow(2,i);
                 printf("End value: %d\n", end);
                 if (start >= N) {
-                        //    pthread_barrier_wait(&mybarrier);
-                        break;
+                        bar.wait();
+                        continue;
                 }
                 printf("Data pair: <%d , %d>\n", array[start], array[end]);
-                int max2 = maxVal(array[start], array[end]);
-                maximum = max2;
-                printf("Pair Max: %i\n", max2 );
-                array[start] = max2;
-                printf("I: %i\n", i );
+                int maximum = maxVal(array[start], array[end]);
+                printf("Pair Max: %i\n", maximum );
+                array[start] = maximum;
                 printf("UPDATED ARRAY: \n" );
                 printArray(array);
                 printf("AH! WE'VE HIT A BARRIER! \n" );
-                //    pthread_barrier_wait(&mybarrier);
+                bar.wait();
 
         }
-        rounds = i;
         return NULL;
 }
 
@@ -85,38 +80,42 @@ void printArray (int arr[]){
         printf("\n");
 }
 
+void createThreads(){
+}
+
+void joinThreads(){
+}
+
+int getUserInput (int a) {
+        return 0;
+}
 // Driver Code
 int main()
 {
         printf("INITIAL ARRAY: \n" );
         printArray(array);
+        printf(" \n" );
+
         pthread_t threads[N_THREADS];
         threadArgs tid[N_THREADS];
-        pthread_barrier_init(&mybarrier, NULL, N_THREADS);
 
         // Creating threads
         printf("ENTERING CREATION LOOP -------------- \n");
         for (int i = 0; i < N; i+=2) {
                 tid[i/2].id = i;
                 printf("Creating threads -------------- \n");
-                pthread_create(&threads[i], NULL, findMax, &tid[i/2]);
+                pthread_create(&threads[i/2], NULL, findMax, &tid[i/2]);
         }
         printf("EXITING CREATION LOOP -------------- \n");
+
         // joining threads i.e. waiting for all threads to complete
         printf("ENTERING JOIN LOOP -------------- \n");
         for (int i = 0; i < N_THREADS; i++) {
-                printf("Joining threads --------------- \n");
                 pthread_join(threads[i], NULL);
         }
         printf("EXITING JOIN LOOP -------------- \n");
 
 
-        printf("DESTROYING BARRIER! \n" );
-        //    pthread_barrier_destroy(&mybarrier);
-
-        printf("MAX VALUE: %d\n", maximum);
-        printf("TOTAL ROUNDS: %d\n", rounds+1);
-        printf("FINAL ARRAY: \n" );
-        printArray(array);
+        printf("MAX VALUE: %d\n", array[0]);
         return 0;
 }

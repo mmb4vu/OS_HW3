@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "thread.h"
 
+/* g++ -o sample sample.cpp barrier.cpp -lm -lpthread -lrt */
+
 // Given a list of N numbers
 #define N 8
 
@@ -72,6 +74,7 @@ void* findMax (void* arg){
 
         }
         rounds = i;
+        return NULL;
 }
 
 void printArray (int arr[]){

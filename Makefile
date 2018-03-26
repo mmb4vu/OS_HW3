@@ -1,4 +1,4 @@
-test: thread.cpp barrier.cpp
-	g++ -o test thread.cpp barrier.cpp -lm -lpthread -lrt
+max: findMaxThreaded.cpp barrier.cpp
+	g++ findMaxThreaded.cpp barrier.cpp -lm -lpthread -lrt -o max
 clean:
-	rm test
+	rm max

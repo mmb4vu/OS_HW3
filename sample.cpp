@@ -5,15 +5,6 @@
 #include <time.h>
 #include "barrier.h"
 
-/*
-   // pthread_barrier  -> make a global or a struct of params
-   // pthread_barrier_init
-   // pthread_barrier_wait
-
-
-   // these are in cpp
- */
-
 #define THREAD_COUNT 4
 
 pthread_barrier_t mybarrier;

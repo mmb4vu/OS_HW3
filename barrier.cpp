@@ -1,12 +1,24 @@
 /*
-   Implementation of memory barrier via binary semaphores
-   taken from OS lecture: MARCH 22, 2018
+   Synchronization with Barriers
+   CS4414: Operating Systems MP3
+   Spring 2018
+
+   Melony Bennis, mmb4vu
+
+   barrier.cpp - implementation of memory barrier via binary semaphores
+   Taken from OS lecture: MARCH 22, 2018
+
  */
 
 #include "barrier.h"
 
 Barrier::Barrier() {
-        printf("Constructor is constructing!! \n");
+        //  printf("Constructor is constructing!! \n");
+        init = 0;
+        value = init;
+        sem_init(&mutex, 0, 1);
+        sem_init(&waitq, 0, 0);
+        sem_init(&throttle, 0, 0);
 }
 
 Barrier::Barrier(int init_) {

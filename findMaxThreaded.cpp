@@ -1,33 +1,23 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-#include "thread.h"
-#include "barrier.h"
+#include <string.h>
 #include <pthread.h>
 
+#include "findMaxThreaded.h"
+#include "barrier.h"
 using namespace std;
 
+int N = 0;
+int N_THREADS = 0;
+int N_ROUNDS = 0;
 
-/*
-   A maximum-finding binary reduction works much like a basketball tournament: pairs of items can be
-   compared in parallel just like pairs of teams play each other in a game. The maximum item (or winner of the
-   game) goes on to the next round. If there are N numbers (or N teams), the total number of rounds will be
-   log2 N.
-
-   For a given round, we will use individual threads (basketball courts) to execute the comparisons (play the
-   games) concurrently. But we must wait until all of the comparisons for a given round have been made before
-   we can re-use the threads (courts) to start the next. For this, you will need to implement a barrier primitive.
- */
-
-int array[] = { 1, 5, 35, 34, 22, 14, 15, 18 };
-int N =  8;
-int N_THREADS = N/2;
-int N_ROUNDS = log_2(N);
-
-// Barrier bar(N_THREADS);
-Barrier bar(N_THREADS);
-pthread_barrier_t mybarrier;
+Barrier bar;
+int array[8192];
 
 int log_2 (int x){
         int result = -1;
@@ -67,7 +57,6 @@ void* findMax (void* arg){
                 printArray(array);
                 printf("AH! WE'VE HIT A BARRIER! \n" );
                 bar.wait();
-
         }
         return NULL;
 }
@@ -80,42 +69,60 @@ void printArray (int arr[]){
         printf("\n");
 }
 
-void createThreads(){
+void createThreads(pthread_t *threads, threadArgs *tid){
+        for (int i = 0; i < N; i+=2) {
+                tid[i/2].id = i;
+                pthread_create(&threads[i/2], NULL, findMax, &tid[i/2]);
+        }
 }
 
-void joinThreads(){
+void joinThreads(pthread_t *threads){
+        for (int i = 0; i < N_THREADS; i++)
+                pthread_join(threads[i], NULL);
+
 }
 
-int getUserInput (int a) {
-        return 0;
+void getUserInput () {
+        std::string getInput;
+        while (true) {
+                std:: getline(std::cin, getInput);
+                if (getInput.empty()) break;
+                stringstream convert(getInput);
+                convert >> array[N];
+                N++;
+        }
+        printf("The value of N is: %d\n", N);
 }
+
 // Driver Code
 int main()
 {
+
+        getUserInput();
+        N_THREADS = N/2;
+        N_ROUNDS = log_2(N);
+
         printf("INITIAL ARRAY: \n" );
         printArray(array);
         printf(" \n" );
+
+        bar.init = N/2;
+        bar.value = N/2;
 
         pthread_t threads[N_THREADS];
         threadArgs tid[N_THREADS];
 
         // Creating threads
         printf("ENTERING CREATION LOOP -------------- \n");
-        for (int i = 0; i < N; i+=2) {
-                tid[i/2].id = i;
-                printf("Creating threads -------------- \n");
-                pthread_create(&threads[i/2], NULL, findMax, &tid[i/2]);
-        }
+        createThreads(threads, tid);
         printf("EXITING CREATION LOOP -------------- \n");
 
         // joining threads i.e. waiting for all threads to complete
         printf("ENTERING JOIN LOOP -------------- \n");
-        for (int i = 0; i < N_THREADS; i++) {
-                pthread_join(threads[i], NULL);
-        }
+        joinThreads(threads);
         printf("EXITING JOIN LOOP -------------- \n");
 
-
         printf("MAX VALUE: %d\n", array[0]);
+
         return 0;
 }

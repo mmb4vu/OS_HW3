@@ -1,3 +1,14 @@
+/*
+ *   Synchronization with Barriers
+ *   CS4414: Operating Systems MP3
+ *   Spring 2018
+ *
+ *   Melony Bennis, mmb4vu
+ *
+ *   findMaxSeq.cpp - finds max of N sized array sequentially
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -9,19 +20,6 @@
 #define N_THREADS N/2
 
 using namespace std;
-
-/* g++ -o sample sample.cpp barrier.cpp -lm -lpthread -lrt */
-
-/*
-   A maximum-finding binary reduction works much like a basketball tournament: pairs of items can be
-   compared in parallel just like pairs of teams play each other in a game. The maximum item (or winner of the
-   game) goes on to the next round. If there are N numbers (or N teams), the total number of rounds will be
-   log2 N.
-
-   For a given round, we will use individual threads (basketball courts) to execute the comparisons (play the
-   games) concurrently. But we must wait until all of the comparisons for a given round have been made before
-   we can re-use the threads (courts) to start the next. For this, you will need to implement a barrier primitive.
- */
 
 int array[] = { 1, 5, 35, 34, 22, 14, 15, 18 };
 int rounds = 0;
@@ -47,8 +45,6 @@ int maxVal( int x, int y){
 
 int main()
 {
-        //  int array[] = {111,222,3,671};
-        //  int size = sizeof(array)/sizeof(array[0]); // change to 8000 for total possible numbers
 
         int i, j, k, max, start, end;
         int count = 0;

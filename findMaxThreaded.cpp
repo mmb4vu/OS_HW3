@@ -1,13 +1,20 @@
+/*
+ *   Synchronization with Barriers
+ *   CS4414: Operating Systems MP3
+ *   Spring 2018
+ *
+ *   Melony Bennis, mmb4vu
+ *
+ *   findMaxThreaded.cpp - finds max of N sized array using threads
+ *
+ */
+
+
 #include <iostream>
 #include <sstream>
-#include <fstream>
-#include <string>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include <pthread.h>
-
 #include "findMaxThreaded.h"
 #include "barrier.h"
 using namespace std;
@@ -30,7 +37,7 @@ int log_2 (int x){
 
 int maxVal( int x, int y){
         int tempMax;
-        if (x > y) tempMax = x;
+        if (x >= y) tempMax = x;
         else tempMax = y;
         return tempMax;
 }
@@ -38,24 +45,15 @@ int maxVal( int x, int y){
 void* findMax (void* arg){
         threadArgs *args = (threadArgs*) arg;
         int x = args->id;
-        printf("X: %d\n", x);
         for (int i = 0; i < N_ROUNDS; i++) {
-                printf("Round: %d ----------------\n", i);
                 int start = (int)pow(2,i) * x;
-                printf("Start value: %d\n", start );
                 int end = start + (int)pow(2,i);
-                printf("End value: %d\n", end);
                 if (start >= N) {
                         bar.wait();
                         continue;
                 }
-                printf("Data pair: <%d , %d>\n", array[start], array[end]);
                 int maximum = maxVal(array[start], array[end]);
-                printf("Pair Max: %i\n", maximum );
                 array[start] = maximum;
-                printf("UPDATED ARRAY: \n" );
-                printArray(array);
-                printf("AH! WE'VE HIT A BARRIER! \n" );
                 bar.wait();
         }
         return NULL;
@@ -91,38 +89,30 @@ void getUserInput () {
                 convert >> array[N];
                 N++;
         }
-        printf("The value of N is: %d\n", N);
 }
 
-// Driver Code
-int main()
-{
+int main() {
 
+        // Getting user input and putting in array
         getUserInput();
         N_THREADS = N/2;
         N_ROUNDS = log_2(N);
 
-        printf("INITIAL ARRAY: \n" );
-        printArray(array);
-        printf(" \n" );
-
+        // Initializing barrier
         bar.init = N/2;
         bar.value = N/2;
 
+        // Initializing threads
         pthread_t threads[N_THREADS];
         threadArgs tid[N_THREADS];
 
         // Creating threads
-        printf("ENTERING CREATION LOOP -------------- \n");
         createThreads(threads, tid);
-        printf("EXITING CREATION LOOP -------------- \n");
 
         // joining threads i.e. waiting for all threads to complete
-        printf("ENTERING JOIN LOOP -------------- \n");
         joinThreads(threads);
-        printf("EXITING JOIN LOOP -------------- \n");
 
-        printf("MAX VALUE: %d\n", array[0]);
+        cout << array[0] << endl;
 
         return 0;
 }

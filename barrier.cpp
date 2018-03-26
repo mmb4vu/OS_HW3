@@ -1,19 +1,18 @@
 /*
-   Synchronization with Barriers
-   CS4414: Operating Systems MP3
-   Spring 2018
-
-   Melony Bennis, mmb4vu
-
-   barrier.cpp - implementation of memory barrier via binary semaphores
-   Taken from OS lecture: MARCH 22, 2018
-
+ *   Synchronization with Barriers
+ *   CS4414: Operating Systems MP3
+ *   Spring 2018
+ *
+ *   Melony Bennis, mmb4vu
+ *
+ *   barrier.cpp - implementation of memory barrier via binary semaphores
+ *   Taken from OS lecture: MARCH 22, 2018
+ *
  */
 
 #include "barrier.h"
 
 Barrier::Barrier() {
-        //  printf("Constructor is constructing!! \n");
         init = 0;
         value = init;
         sem_init(&mutex, 0, 1);
@@ -35,13 +34,11 @@ void Barrier::wait() {
         value--;
 
         if(value != 0) {
-                printf("WAITING FOR THREADS. ---------\n");
                 sem_post(&mutex);
                 sem_wait(&waitq);
                 sem_post(&throttle);
         }
         else{
-                printf("THREADS COMPLETE. ----------- \n");
                 for (int i = 0; i < init - 1; i++) {
                         sem_post(&waitq);
                         sem_wait(&throttle);

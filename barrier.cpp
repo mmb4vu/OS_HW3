@@ -5,13 +5,17 @@
  *
  *   Melony Bennis, mmb4vu
  *
- *   barrier.cpp - implementation of memory barrier via binary semaphores
- *   Taken from OS lecture: MARCH 22, 2018
+ *   barrier.cpp - implementation simple memory barrier
+ *
+ *   Compile: make
+ *   Headers: barrier.h thread.h
+ *   Executable: max
  *
  */
 
 #include "barrier.h"
 
+/* Constructor */
 Barrier::Barrier() {
         init = 0;
         value = init;
@@ -20,6 +24,7 @@ Barrier::Barrier() {
         sem_init(&throttle, 0, 0);
 }
 
+/* Initializing barrier, and sets counting semaphore to use binary func. */
 Barrier::Barrier(int init_) {
         init = init_;
         value = init;
@@ -29,10 +34,10 @@ Barrier::Barrier(int init_) {
 
 }
 
+/* implementation of pthread_wait() as discussed in class */
 void Barrier::wait() {
         sem_wait(&mutex);
         value--;
-
         if(value != 0) {
                 sem_post(&mutex);
                 sem_wait(&waitq);

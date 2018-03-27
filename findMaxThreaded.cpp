@@ -5,10 +5,14 @@
  *
  *   Melony Bennis, mmb4vu
  *
- *   findMaxThreaded.cpp - finds max of N sized array using threads
+ *   findMaxThreaded.cpp - finds max of N sized array using threads, and
+ *   utilizes the barrier implementation found in barrier.cpp
+ *
+ *   Compile: make
+ *   Headers: barrier.h thread.h
+ *   Executable: max
  *
  */
-
 
 #include <iostream>
 #include <sstream>
@@ -26,6 +30,7 @@ int N_ROUNDS = 0;
 Barrier bar;
 int array[8192];
 
+/* Simple helper function to find the log base 2 of a given number */
 int log_2 (int x){
         int result = -1;
         while (x) {
@@ -35,6 +40,7 @@ int log_2 (int x){
         return result;
 }
 
+/* Simple helper function which detemines the maximum of two integers */
 int maxVal( int x, int y){
         int tempMax;
         if (x >= y) tempMax = x;
@@ -42,6 +48,7 @@ int maxVal( int x, int y){
         return tempMax;
 }
 
+/* Helper function implementation of a parallel, binary reduction */
 void* findMax (void* arg){
         threadArgs *args = (threadArgs*) arg;
         int x = args->id;
@@ -59,6 +66,7 @@ void* findMax (void* arg){
         return NULL;
 }
 
+/* Simple helper function which prints the given array */
 void printArray (int arr[]){
         int k;
         for (k = 0; k < N; k++) {
@@ -67,6 +75,8 @@ void printArray (int arr[]){
         printf("\n");
 }
 
+/* Simple helper function which makes N/2 threads for threaded solution of
+   parallel binary reduction */
 void createThreads(pthread_t *threads, threadArgs *tid){
         for (int i = 0; i < N; i+=2) {
                 tid[i/2].id = i;
@@ -74,12 +84,15 @@ void createThreads(pthread_t *threads, threadArgs *tid){
         }
 }
 
+/* Joins created threads and allow for the determination of a final max */
 void joinThreads(pthread_t *threads){
         for (int i = 0; i < N_THREADS; i++)
                 pthread_join(threads[i], NULL);
 
 }
 
+/* Simple helper function which collects inputs from stdin and
+   puts them into an array. */
 void getUserInput () {
         std::string getInput;
         while (true) {
@@ -93,8 +106,10 @@ void getUserInput () {
 
 int main() {
 
+        //  clock_t begin = clock();
         // Getting user input and putting in array
         getUserInput();
+
         N_THREADS = N/2;
         N_ROUNDS = log_2(N);
 
@@ -112,6 +127,7 @@ int main() {
         // joining threads i.e. waiting for all threads to complete
         joinThreads(threads);
 
+        // stdout
         cout << array[0] << endl;
 
         return 0;
